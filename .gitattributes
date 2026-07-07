@@ -1,0 +1,3 @@
+# Скрипты всегда с Unix-переносами (LF), иначе bash на Linux падает с
+# ошибкой "bad interpreter: /bin/bash^M". Важно при работе из Windows.
+*.sh text eol=lf
