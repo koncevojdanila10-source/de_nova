@@ -1,0 +1,29 @@
+# BUSCO version is: 6.1.0 
+# The lineage dataset is: vibrio_odb12 (Creation date: 2026-05-22, number of genomes: 122, number of BUSCOs: 1570)
+# Summarized benchmarking in BUSCO notation for file /mnt/c/Users/Public/de_nova/results/assembly_spades_i/scaffolds.fasta
+# BUSCO was run in mode: prok_genome_prod
+# Gene predictor used: prodigal
+
+	***** Results: *****
+
+	C:99.0%[S:99.0%,D:0.0%],F:0.3%,M:0.7%,n:1570	   
+	1554	Complete BUSCOs (C)			   
+	1554	Complete and single-copy BUSCOs (S)	   
+	0	Complete and duplicated BUSCOs (D)	   
+	5	Fragmented BUSCOs (F)			   
+	11	Missing BUSCOs (M)			   
+	1570	Total BUSCO groups searched		   
+
+Assembly Statistics:
+	306	Number of scaffolds
+	307	Number of contigs
+	4150145	Total length
+	0.002%	Percent gaps
+	146 kbp	Scaffold N50
+	146 kbp	Contigs N50
+
+
+Dependencies and versions:
+	hmmsearch: 3.4
+	bbtools: None
+	prodigal: 2.6.3
