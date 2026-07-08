@@ -64,7 +64,7 @@ Detailed reports and the two final assemblies are in
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/de_nova.git
+git clone https://github.com/koncevojdanila10-source/de_nova.git
 cd de_nova
 chmod +x 00_setup.sh run_denovo.sh
 ./00_setup.sh          # creates conda environments and installs all tools
