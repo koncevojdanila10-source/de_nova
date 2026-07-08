@@ -116,21 +116,30 @@ if have assembly; then
   conda activate "$ENV_ASM"
 
   # 2a. SPAdes только по Illumina
+  # --phred-offset 33: у этих ридов равномерно высокое качество, и SPAdes не
+  # может сам определить кодировку (Phred+33 vs +64) — задаём явно.
   log "SPAdes (Illumina-only) → assembly_spades_i"
   spades.py -1 "$TRIM_R1" -2 "$TRIM_R2" \
-    -t "$THREADS" --disable-gzip-output \
+    -t "$THREADS" --phred-offset 33 --disable-gzip-output \
     -o "$OUT/assembly_spades_i"
 
   # 2b. SPAdes гибридная (Illumina + Nanopore)
   log "SPAdes (hybrid) → assembly_spades_h"
   spades.py -1 "$TRIM_R1" -2 "$TRIM_R2" --nanopore "$NANOPORE" \
-    -t "$THREADS" --disable-gzip-output \
+    -t "$THREADS" --phred-offset 33 --disable-gzip-output \
     -o "$OUT/assembly_spades_h"
 
-  # 2c. Flye по Nanopore (long-read сборка — вход для полировки Pilon)
-  log "Flye (nanopore-only) → assembly_flye"
-  flye --nano-raw "$NANOPORE" --genome-size "$GENOME_SIZE" \
-    --threads "$THREADS" --out-dir "$OUT/assembly_flye"
+  # 2c. Flye по Nanopore (long-read сборка — вход для полировки Pilon).
+  # Покрытие нанопором ~730x — слишком много, Flye не собирает дизъонтиги и
+  # работает часами. Используем встроенный --asm-coverage 50: Flye сам берёт
+  # самые ДЛИННЫЕ риды до 50x для сборки дизъонтигов (каноничный способ по
+  # документации, требует --genome-size). --nano-hq: у ридов низкая ошибка
+  # (дивергенция перекрытий ~7% => ~3.5% на рид).
+  # Падение Flye не должно ронять весь пайплайн — ловим ошибку через "|| ...".
+  log "Flye (nanopore-only, --asm-coverage 50, --nano-hq) → assembly_flye"
+  flye --nano-hq "$NANOPORE" --genome-size "$GENOME_SIZE" --asm-coverage 50 \
+    --threads "$THREADS" --out-dir "$OUT/assembly_flye" \
+    || log "ВНИМАНИЕ: Flye не удался — пропускаю сборку Flye, пайплайн продолжается"
 
   conda deactivate
 fi
@@ -157,7 +166,9 @@ fi
 # Полируем Flye-сборку короткими Illumina-ридами (bwa → samtools → Pilon).
 POLISHED="$OUT/polish_pilon/pilon.fasta"
 
-if have polishing; then
+if have polishing && [ ! -f "$ASM_FLYE" ]; then
+  log "=== ЭТАП 4: полировка пропущена — нет сборки Flye ($ASM_FLYE) ==="
+elif have polishing; then
   log "=== ЭТАП 4: полировка Flye-сборки Illumina-ридами (Pilon) ==="
   mkdir -p "$OUT/polish_pilon"
   ( cd "$OUT/polish_pilon"
